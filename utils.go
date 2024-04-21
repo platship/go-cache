@@ -5,14 +5,15 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
-	"github.com/fasthey/go-utils/conv"
-	"github.com/fasthey/go-utils/stringx"
 	"log"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/fasthey/go-utils/conv"
+	"github.com/fasthey/go-utils/stringx"
 )
 
 func EncodeGob(item *Item) ([]byte, error) {
@@ -135,7 +136,7 @@ func scanValue(val map[string]string, field reflect.StructField, value reflect.V
 			scanValue(val, field.Type.Field(i), value.Field(i))
 		}
 	} else {
-		formTag := field.Tag.Get("cache")
+		formTag := field.Tag.Get("redis")
 		if formTag == "" {
 			formTag = stringx.GetGromTag(field.Tag.Get("gorm"))
 		}

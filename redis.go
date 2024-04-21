@@ -187,9 +187,8 @@ func (c *RedisCache) HMSet(key string, data interface{}) error {
 			}
 		}
 	}
-
 	if err := c.client.HMSet(ctx, c.prefix+key, values).Err(); err != nil {
-		return errors.New("add failed")
+		return err
 	}
 	return nil
 }
@@ -293,7 +292,7 @@ func (c *RedisCache) HGetAll(key string) (data map[string]string, err error) {
 	}
 	data, err = c.client.HGetAll(ctx, c.prefix+key).Result()
 	if err != nil {
-		return data, errors.New("Get failed")
+		return data, err
 	}
 	return data, nil
 }
@@ -310,6 +309,21 @@ func (c *RedisCache) Expire(key string, expire time.Duration) bool {
 		return true
 	}
 	return false
+}
+
+/**
+ * @desc: 清理
+ * @param {*} bucket
+ * @return {*}
+ */
+func (c *RedisCache) Clear(bucket string) (err error) {
+	iter := c.client.Scan(ctx, 0, c.prefix+bucket+"*", 0).Iterator()
+	for iter.Next(ctx) {
+		if err := c.client.Del(ctx, iter.Val()).Err(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func init() {

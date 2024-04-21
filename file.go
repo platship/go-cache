@@ -387,6 +387,15 @@ func (c *FileCache) Expire(key string, expire time.Duration) bool {
 	return false
 }
 
+/**
+ * @desc: 清理
+ * @param {*} bucket
+ * @return {*}
+ */
+func (c *FileCache) Clear(bucket string) (err error) {
+	return os.Remove(c.filepath(bucket))
+}
+
 func init() {
 	Register("file", NewFileCache())
 }

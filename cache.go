@@ -33,6 +33,7 @@ type Cache interface {
 	HDel(key, field string) (err error)
 	HGetAll(key string) (data map[string]string, err error)
 	Expire(key string, expire time.Duration) bool // 设置有效期
+	Clear(bucket string) error
 }
 
 // Options represents a struct for specifying configuration options for the cache middleware.
