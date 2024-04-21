@@ -13,7 +13,6 @@ import (
 	"time"
 
 	"github.com/fasthey/go-utils/conv"
-	"github.com/fasthey/go-utils/stringx"
 )
 
 func EncodeGob(item *Item) ([]byte, error) {
@@ -98,7 +97,7 @@ func setValue(field reflect.StructField, value reflect.Value) (tag string, val i
 	} else {
 		tag := field.Tag.Get("cache")
 		if tag == "" {
-			tag = stringx.GetGromTag(field.Tag.Get("gorm"))
+			tag = GetGromTag(field.Tag.Get("gorm"))
 		}
 		if tag != "" {
 			if field.Type.Kind() == reflect.Ptr {
@@ -138,7 +137,7 @@ func scanValue(val map[string]string, field reflect.StructField, value reflect.V
 	} else {
 		formTag := field.Tag.Get("redis")
 		if formTag == "" {
-			formTag = stringx.GetGromTag(field.Tag.Get("gorm"))
+			formTag = GetGromTag(field.Tag.Get("gorm"))
 		}
 		if formTag != "" {
 			// 查看是否有取值
@@ -238,4 +237,44 @@ func ToStr(value interface{}, args ...int) (s string) {
 		s = fmt.Sprintf("%v", v)
 	}
 	return s
+}
+
+/**
+ * @desc: 解析grom的表名
+ * @param {string} str
+ * @return {*}
+ */
+func GetGromTag(str string) string {
+	if str == "" || str == "-" {
+		return ""
+	}
+	if strings.Contains(str, "column") {
+		names := strings.Split(str, ";")
+		if names[0] != "" {
+			column := strings.Split(names[0], ":")
+			if column[1] != "" {
+				return column[1]
+			}
+		}
+	}
+	return ""
+}
+
+/**
+ * @desc: 排除掉多余的字段
+ * @param {string} str
+ * @return {*}
+ */
+func GetTableFields(field []string, dst interface{}) (tableFields []string) {
+	tableFields = append(tableFields, "id")
+	fields := reflect.TypeOf(dst).Elem()
+	for i := 0; i < fields.NumField(); i++ {
+		fieldName := GetGromTag(fields.Field(i).Tag.Get("gorm"))
+		if fieldName != "" {
+			if StringInArray(fieldName, field) {
+				tableFields = append(tableFields, fieldName)
+			}
+		}
+	}
+	return tableFields
 }
