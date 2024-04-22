@@ -11,8 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/fasthey/go-utils/conv"
+	"unsafe"
 )
 
 func EncodeGob(item *Item) ([]byte, error) {
@@ -110,7 +109,7 @@ func setValue(field reflect.StructField, value reflect.Value) (tag string, val i
 					return tag, ToStr(value), nil
 				}
 			} else if field.Type.Kind() == reflect.Slice {
-				val = conv.ByteToString(value.Bytes())
+				val = ByteToString(value.Bytes())
 				if val != "" {
 					return tag, val, nil
 				}
@@ -158,7 +157,7 @@ func scanValue(val map[string]string, field reflect.StructField, value reflect.V
 			case reflect.Bool:
 				value.SetBool(v == "true")
 			case reflect.Slice:
-				value.SetBytes(conv.StringToByte(v))
+				value.SetBytes(StringToByte(v))
 			case reflect.Struct:
 				switch value.Type().String() {
 				case "time.Time":
@@ -277,4 +276,28 @@ func GetTableFields(field []string, dst interface{}) (tableFields []string) {
 		}
 	}
 	return tableFields
+}
+
+/**
+ * @desc: 字节转字符串
+ * @return {*}
+ */
+func ByteToString(b []byte) string {
+	/* #nosec G103 */
+	return *(*string)(unsafe.Pointer(&b))
+}
+
+/**
+ * @desc: 字符串转字节
+ * @return {*}
+ */
+func StringToByte(s string) (b []byte) {
+	/* #nosec G103 */
+	bh := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	/* #nosec G103 */
+	sh := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	bh.Data = sh.Data
+	bh.Cap = sh.Len
+	bh.Len = sh.Len
+	return b
 }
