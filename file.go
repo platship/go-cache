@@ -178,8 +178,9 @@ func (c *FileCache) startGC() {
 // StartAndGC starts GC routine based on config string settings.
 func (c *FileCache) StartAndGC(opt Options) error {
 	c.lock.Lock()
-	exePath, _ := os.Getwd()
-	c.rootPath = exePath + "/runtime/" + opt.AdapterConfig
+	// exePath, _ := os.Getwd()
+	// c.rootPath = exePath + opt.AdapterConfig
+	c.rootPath = opt.AdapterConfig
 	c.interval = opt.Interval
 
 	if !filepath.IsAbs(c.rootPath) {
