@@ -326,6 +326,43 @@ func (c *RedisCache) Clear(bucket string) (err error) {
 	return nil
 }
 
+func (c *RedisCache) Size(bucket string) string {
+	info, err := c.client.Info(ctx, "memory").Result()
+	if err != nil {
+		return "0"
+	}
+	usedMemory := parseMemoryInfo(info)
+	return usedMemory
+}
+
+// 解析INFO命令返回的内存信息
+func parseMemoryInfo(info string) string {
+	for _, line := range splitInfo(info) {
+		if isMemoryLine(line) {
+			return line[len("used_memory:"):]
+		}
+	}
+	return "0"
+}
+
+// 分割INFO命令返回的字符串
+func splitInfo(response string) map[string]string {
+	info := make(map[string]string)
+	lines := strings.Split(response, "\r\n")
+	for _, line := range lines {
+		if strings.Contains(line, ":") {
+			parts := strings.SplitN(line, ":", 2)
+			info[parts[0]] = parts[1]
+		}
+	}
+	return info
+}
+
+// 检查是否是描述内存使用的行
+func isMemoryLine(line string) bool {
+	return len(line) > 12 && line[:12] == "used_memory:"
+}
+
 func init() {
 	Register("redis", &RedisCache{})
 }

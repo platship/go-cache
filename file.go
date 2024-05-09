@@ -397,6 +397,20 @@ func (c *FileCache) Clear(bucket string) (err error) {
 	return os.Remove(c.filepath(bucket))
 }
 
+func (c *FileCache) Size(bucket string) string {
+	var size uint64
+	filepath.Walk(bucket, func(_ string, info os.FileInfo, err error) error {
+		if info == nil {
+			return nil
+		}
+		if !info.IsDir() {
+			size += uint64(info.Size())
+		}
+		return nil
+	})
+	return fmt.Sprintf("%d", size)
+}
+
 func init() {
 	Register("file", NewFileCache())
 }
