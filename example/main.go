@@ -22,7 +22,7 @@ func main() {
 
 	newCache, err := cache.New(cache.Options{
 		Adapter:       "file",
-		AdapterConfig: "cache",
+		AdapterConfig: "./runtime/cache",
 		OccupyMode:    true,
 	})
 	if err != nil {
