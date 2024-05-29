@@ -1,4 +1,4 @@
-module github.com/fasthey/go-cache
+module github.com/rehok/go-cache
 
 go 1.20
 
