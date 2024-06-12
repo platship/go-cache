@@ -40,9 +40,14 @@ func NewFileCache() *FileCache {
 }
 
 func (c *FileCache) filepath(key string) string {
+	keys := strings.Split(key, "_")
+	var path string
+	if len(keys) >= 2 {
+		path = "/" + keys[0]
+	}
 	m := md5.Sum([]byte(key))
 	hash := hex.EncodeToString(m[:])
-	return filepath.Join(c.rootPath, string(hash[0]), string(hash[1]), hash)
+	return filepath.Join(c.rootPath+path, string(hash[0]), string(hash[1]), hash)
 }
 
 // Set puts value into cache with key and expire time.
@@ -156,7 +161,7 @@ func (c *FileCache) startGC() {
 
 		data, err := os.ReadFile(path)
 		if err != nil && !os.IsNotExist(err) {
-			fmt.Errorf("ReadFile: %v", err)
+			fmt.Errorf("readFile: %v", err)
 		}
 
 		item := new(Item)
@@ -165,7 +170,7 @@ func (c *FileCache) startGC() {
 		}
 		if item.hasExpired() {
 			if err = os.Remove(path); err != nil && !os.IsNotExist(err) {
-				return fmt.Errorf("Remove: %v", err)
+				return fmt.Errorf("remove: %v", err)
 			}
 		}
 		return nil
@@ -208,7 +213,7 @@ func (c *FileCache) HMSet(key string, data interface{}) error {
 	}
 	field := reflect.TypeOf(data)
 	if field.Kind() == reflect.Ptr && field.Elem().Kind() == reflect.Struct {
-		return errors.New("HMSet解析失败")
+		return errors.New("parsing failed")
 	}
 	value := reflect.ValueOf(data)
 	values := make(map[string]interface{})
@@ -243,7 +248,7 @@ func (c *FileCache) HMScan(val map[string]string, dst interface{}) (err error) {
 	types := reflect.TypeOf(dst)
 	// 首先判断传入参数的类型
 	if !(types.Kind() == reflect.Ptr && types.Elem().Kind() == reflect.Struct) {
-		return errors.New("HMScan解析失败")
+		return errors.New("parsing failed")
 	}
 	// 拿到指针所指向的元素的类型
 	types = types.Elem()
@@ -264,7 +269,7 @@ func (c *FileCache) HMScan(val map[string]string, dst interface{}) (err error) {
  */
 func (c *FileCache) HMGet(key string, fields []string) (res map[string]string, err error) {
 	if !c.Exists(key) {
-		return res, errors.New("数据不存在")
+		return res, errors.New("does not exist")
 	}
 	data, err := c.HGetAll(key)
 	if err != nil {
@@ -289,7 +294,7 @@ func (c *FileCache) HMGet(key string, fields []string) (res map[string]string, e
  */
 func (c *FileCache) HGet(key, field string) (res string, err error) {
 	if !c.Exists(key) {
-		return res, errors.New("数据不存在")
+		return res, errors.New("does not exist")
 	}
 	data, err := c.HGetAll(key)
 	if err == nil {
@@ -299,7 +304,7 @@ func (c *FileCache) HGet(key, field string) (res string, err error) {
 			}
 		}
 	}
-	return res, errors.New("没找到数据")
+	return res, errors.New("does not exist")
 }
 
 /**
@@ -393,8 +398,11 @@ func (c *FileCache) Expire(key string, expire time.Duration) bool {
  * @param {*} bucket
  * @return {*}
  */
-func (c *FileCache) Clear(bucket string) (err error) {
-	return os.Remove(c.filepath(bucket))
+func (c *FileCache) Clear(key string) (err error) {
+	if !strings.Contains(key, "_") {
+		return os.RemoveAll(c.rootPath + "/" + key)
+	}
+	return os.Remove(c.filepath(key))
 }
 
 func (c *FileCache) Size(bucket string) string {

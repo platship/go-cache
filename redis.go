@@ -169,7 +169,7 @@ func (c *RedisCache) HMSet(key string, data interface{}) error {
 	}
 	field := reflect.TypeOf(data)
 	if field.Kind() == reflect.Ptr && field.Elem().Kind() == reflect.Struct {
-		return errors.New("HMSet解析失败")
+		return errors.New("parsing failed")
 	}
 	value := reflect.ValueOf(data)
 	values := make(map[string]interface{})
@@ -244,7 +244,7 @@ func (c *RedisCache) HMGet(key string, fields []string) (res map[string]string, 
  */
 func (c *RedisCache) HGet(key, field string) (data string, err error) {
 	if c.client == nil {
-		return data, errors.New("Redis Error")
+		return data, errors.New("redis Error")
 	}
 	if key == "" {
 		return data, errors.New("parameter is empty")
