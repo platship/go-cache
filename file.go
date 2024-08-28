@@ -313,24 +313,14 @@ func (c *FileCache) HGet(key, field string) (res string, err error) {
  * @param {interface{}} data
  * @return {*}
  */
-func (c *FileCache) HSet(key string, newData interface{}) (bool, error) {
-	if !c.Exists(key) {
-		return false, nil
-	}
-	data, err := c.HGetAll(key)
-	if err == nil {
-		if newData != nil {
-			if reflect.TypeOf(newData).Kind() == reflect.Map {
-				for k, v := range newData.(map[string]interface{}) {
-					data[k] = ToStr(v)
-				}
-			} else {
-				return false, errors.New("data must be map")
-			}
-		}
+func (c *FileCache) HSet(key string, data interface{}) (err error) {
+
+	if reflect.TypeOf(data).Kind() == reflect.Map {
 		c.Set(key, data, 0)
+	} else {
+		return errors.New("data must be map")
 	}
-	return true, nil
+	return nil
 }
 
 /**
@@ -380,17 +370,17 @@ func (c *FileCache) HGetAll(key string) (data map[string]string, err error) {
  * @param {time.Duration} expire
  * @return {*}
  */
-func (c *FileCache) Expire(key string, expire time.Duration) bool {
+func (c *FileCache) Expire(key string, expire time.Duration) error {
 	if !c.Exists(key) {
-		return false
+		return errors.New("key does not exist")
 	}
 	data, err := c.Get(key)
 	if err == nil {
 		if err := c.Set(key, data, int64(expire)); err == nil {
-			return true
+			return nil
 		}
 	}
-	return false
+	return err
 }
 
 /**
@@ -417,6 +407,21 @@ func (c *FileCache) Size(bucket string) string {
 		return nil
 	})
 	return fmt.Sprintf("%d", size)
+}
+
+func (c *FileCache) All(bucket string) []string {
+	// 获取所有键
+	var keys []string
+	filepath.Walk(bucket, func(_ string, info os.FileInfo, err error) error {
+		if info == nil {
+			return nil
+		}
+		if !info.IsDir() {
+			keys = append(keys, info.Name())
+		}
+		return nil
+	})
+	return keys
 }
 
 func init() {

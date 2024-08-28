@@ -262,12 +262,12 @@ func (c *RedisCache) HGet(key, field string) (data string, err error) {
  * @param {interface{}} data
  * @return {*}
  */
-func (c *RedisCache) HSet(key string, data interface{}) (bool, error) {
+func (c *RedisCache) HSet(key string, data interface{}) error {
 	err := c.client.HSet(ctx, c.prefix+key, data).Err()
 	if err != nil {
-		return false, errors.New("add failed")
+		return errors.New("add failed")
 	}
-	return true, nil
+	return nil
 }
 
 /**
@@ -303,12 +303,12 @@ func (c *RedisCache) HGetAll(key string) (data map[string]string, err error) {
  * @param {time.Duration} expire
  * @return {*}
  */
-func (c *RedisCache) Expire(key string, expire time.Duration) bool {
+func (c *RedisCache) Expire(key string, expire time.Duration) error {
 	state, err := c.client.Expire(ctx, c.prefix+key, expire).Result()
 	if state || err == nil {
-		return true
+		return nil
 	}
-	return false
+	return err
 }
 
 /**
@@ -333,6 +333,15 @@ func (c *RedisCache) Size(bucket string) string {
 	}
 	usedMemory := parseMemoryInfo(info)
 	return usedMemory
+}
+
+func (c *RedisCache) All(bucket string) []string {
+	// 获取所有键
+	keys, err := c.client.Keys(ctx, "*").Result()
+	if err != nil {
+		return []string{}
+	}
+	return keys
 }
 
 // 解析INFO命令返回的内存信息

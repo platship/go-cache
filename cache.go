@@ -29,12 +29,13 @@ type Cache interface {
 	HMScan(val map[string]string, dst interface{}) error
 	HMGet(key string, fields []string) (data map[string]string, err error)
 	HGet(key, field string) (data string, err error)
-	HSet(key string, data interface{}) (bool, error)
-	HDel(key, field string) (err error)
+	HSet(key string, data interface{}) error
+	HDel(key, field string) error
 	HGetAll(key string) (data map[string]string, err error)
-	Expire(key string, expire time.Duration) bool // 设置有效期
+	Expire(key string, expire time.Duration) error // 设置有效期
 	Clear(bucket string) error
 	Size(bucket string) string
+	All(bucket string) []string
 }
 
 // Options represents a struct for specifying configuration options for the cache middleware.
