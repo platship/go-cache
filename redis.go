@@ -2,7 +2,7 @@ package cache
 
 import (
 	"context"
-	"encoding/json"
+
 	"errors"
 	"fmt"
 	"reflect"
@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goccy/go-json"
 	"github.com/redis/go-redis/v9"
 	"gopkg.in/ini.v1"
 )

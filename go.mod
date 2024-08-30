@@ -3,6 +3,7 @@ module github.com/rehok/go-cache
 go 1.20
 
 require (
+	github.com/goccy/go-json v0.10.3
 	github.com/redis/go-redis/v9 v9.5.1
 	gopkg.in/ini.v1 v1.67.0
 

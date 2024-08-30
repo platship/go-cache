@@ -3,7 +3,7 @@ package cache
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"encoding/json"
+
 	"errors"
 	"fmt"
 	"log"
@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/goccy/go-json"
 )
 
 // Item represents a cache item.
