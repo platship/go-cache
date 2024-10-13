@@ -317,11 +317,11 @@ func (c *RedisCache) Expire(key string, expire time.Duration) error {
  * @param {*} bucket
  * @return {*}
  */
-func (c *RedisCache) Clear(bucket string) (err error) {
-	iter := c.client.Scan(ctx, 0, c.prefix+bucket+"*", 0).Iterator()
-	for iter.Next(ctx) {
-		if err := c.client.Del(ctx, iter.Val()).Err(); err != nil {
-			return err
+func (c *RedisCache) Clear(key string) (err error) {
+	keys, err := c.client.Keys(ctx, c.prefix+key+"*").Result()
+	if err == nil {
+		if len(keys) > 0 {
+			c.client.Del(ctx, keys...)
 		}
 	}
 	return nil
@@ -336,9 +336,25 @@ func (c *RedisCache) Size(bucket string) string {
 	return usedMemory
 }
 
-func (c *RedisCache) All(bucket string) []string {
+func (c *RedisCache) TTL(key string) time.Duration {
+	res, err := c.client.TTL(ctx, c.prefix+key).Result()
+	if err != nil {
+		return res
+	}
+	return res
+}
+
+func (c *RedisCache) Type(key string) string {
+	res, err := c.client.Type(ctx, c.prefix+key).Result()
+	if err != nil {
+		return res
+	}
+	return res
+}
+
+func (c *RedisCache) Search(bucket string) []string {
 	// 获取所有键
-	keys, err := c.client.Keys(ctx, "*").Result()
+	keys, err := c.client.Keys(ctx, bucket).Result()
 	if err != nil {
 		return []string{}
 	}

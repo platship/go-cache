@@ -35,7 +35,9 @@ type Cache interface {
 	Expire(key string, expire time.Duration) error // 设置有效期
 	Clear(bucket string) error
 	Size(bucket string) string
-	All(bucket string) []string
+	TTL(key string) time.Duration
+	Type(key string) string
+	Search(bucket string) []string
 }
 
 // Options represents a struct for specifying configuration options for the cache middleware.

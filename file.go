@@ -411,7 +411,15 @@ func (c *FileCache) Size(bucket string) string {
 	return fmt.Sprintf("%d", size)
 }
 
-func (c *FileCache) All(bucket string) []string {
+func (c *FileCache) TTL(key string) (res time.Duration) {
+	return res
+}
+
+func (c *FileCache) Type(key string) (res string) {
+	return res
+}
+
+func (c *FileCache) Search(bucket string) []string {
 	// 获取所有键
 	var keys []string
 	filepath.Walk(bucket, func(_ string, info os.FileInfo, err error) error {
