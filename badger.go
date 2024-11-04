@@ -11,8 +11,8 @@ import (
 
 	"github.com/dgraph-io/badger/v3"
 	"github.com/dgraph-io/badger/v3/options"
-	"github.com/rehok/go-utils/osx"
-	"github.com/rehok/go-utils/timex"
+	"github.com/platship/go-utils/osx"
+	"github.com/platship/go-utils/timex"
 )
 
 type BadgerCache struct {
